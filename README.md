@@ -1,56 +1,181 @@
-## Delivro Task
+# Delivro Dashboard
 
-### Context
+Dashboard pro správu faktur a zásilek s integrací Supabase a deploy na Vercel.
 
-Our Delivro accounting team came to you with a request: to help them keep track of invoices related to each shipment. When our clients create shipments, it goes through our carrier partners (FedEx, UPS, GLS, etc.) and we receive invoices for the created shipments from each of these carriers. Our accounting team has no system to keep track of the invoices, and would like to be able to upload the invoice data directly to our system, so that we can match it with the shipments.
+## Funkce
 
-However, the carriers will sometimes send incorrect invoices as well! The weight or price could be wrong, in which case our accounting team notices and reports this issue to the carrier. When we receive a corrected invoice it is yet again uploaded for the same Shipment ID / Tracking Number and it is expected that the application will update the shipment with the latest invoice data.
+- 📤 **Upload faktur** - Nahrání JSON souborů s fakturními daty
+- 👁️ **Preview dat** - Náhled dat v tabulce před potvrzením uploadu
+- 📊 **Dashboard zásilek** - Zobrazení všech zásilek s nejnovějšími fakturními údaji
+- 🔍 **Filtrování** - Filtrování zásilek podle společnosti
+- 📈 **Historie cen** - Zobrazení historie cen pro každou zásilku
+- 📄 **Paginace** - Efektivní zobrazení velkého množství dat
 
-### The Task
+## Technologie
 
-Create a dashboard that will display all the shipments uploaded to the application so far and allow the user to insert new data by uploading JSON files containing invoice data. The file upload flow within the application should be as follows:
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Databáze**: Supabase (PostgreSQL)
+- **Tabulky**: TanStack Table
+- **Ikony**: Lucide React
 
-1. User selects a JSON file (e.g. the provided example file `invoices_1.json`) containing invoice and shipment data.
-2. The application will allow the user to preview the data from the JSON file _in a table (you can use TanStack Table or any equivalent)**(\*)**_ before they confirm the upload.
-3. Invoice data gets uploaded to the backend and stored in the database in a format of your choosing.
-4. The main shipment dashboard will now display all the latest data, including data from the newly uploaded file.
+## Požadavky
 
-It is possible that multiple JSON files will contain invoice information related to the same shipment, in which case you should keep history of all the invoiced prices for that shipment. The dashboard should mainly display the very last price that got uploaded, but there should be some way to view shipment's price history.
+- Node.js 18+ 
+- npm nebo yarn
+- Účet na Supabase
+- Účet na Vercel (pro deploy)
 
-**IMPORTANT:** You can assume that objects within the JSON file with the same `id` field will always contain the same exact data. For example, if you have already encountered a shipment with the same `id`, all the other fields (e.g. `trackingNumber`, `provider`, `mode`, etc.) will contain the exact same information as last time.
+## Instalace
 
-### User Stories
+1. **Klonování repozitáře a instalace závislostí**
 
-- User should be able to upload any of the `invoices_X.json` files
-- User should be able to preview data from the JSON file _using a table UI**(\*)**_ before submitting it
-- User should be able to view uploaded data though the shipment dashboard
-- User should be able to filter the dashboard to only view shipment's made by a specific company
+```bash
+cd delivro-task_jiri_mika
+npm install
+```
 
-**Changes: (\*)** if you have started working on this task before 19.11.2025, then you do not have to implement the table UI as this was updated on this date.
+2. **Nastavení Supabase**
 
-### Important
+   a. Vytvořte nový projekt na [Supabase](https://supabase.com)
+   
+   b. V SQL Editoru spusťte migrační skript z `supabase/migrations/001_initial_schema.sql`
+   
+   c. Zkopírujte URL projektu a API klíče z Settings > API
 
-- This application is assumed to be entirely internal and thus, you do NOT have to create any mechanism of authentication
-- Application should be able to process and display large quantities of data without significant performance issues
-- You can OPTIONALLY use wireframes found in the `/wireframes` folder for inspiration, but you are strongly encouraged to come up with your own UI/UX ideas
-- You can use any database you are familiar with, but we do recommend the usage of relational DBs
-- You MUST use any React-based solution to create the frontend
-- You MUST use TypeScript on the Frontend and the Backend
-- You MUST provide clear instructions on how to install and run the application
-- If your UI design requires the use of icons, feel free to use any source that falls under an open-source license _(Lucide, Font Awesome, Heroicons, etc.)_
+3. **Konfigurace environment variables**
 
-The **choice of frameworks and libraries does not matter** to us besides these conditions.
+   Vytvořte soubor `.env.local` v kořenovém adresáři projektu:
 
-### Bonus ideas (completely optional)
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
 
-1. Implement a Docker container to run the app
-2. Deploy the application to any infrastructure provider of your choice
-3. Implement i18n (English and any other language of your choice)
+4. **Spuštění vývojového serveru**
 
-### Final remarks
+```bash
+npm run dev
+```
 
-We do not penalize the usage of AI at all. You can complete this task anyhow you want. With that being said, we do strongly care about the result, and if the project is simply an AI generated slop without any post processing input from your side then your submission will not be a very strong contender. We will follow up with a code review call where you will have an opportunity to explain all of your stack choices and why you have implemented the task in your own way.
+Aplikace bude dostupná na [http://localhost:3000](http://localhost:3000)
 
-### Task Submission
+## Struktura projektu
 
-Please push your work to a new PUBLIC repository on your Github or Gitlab profile and share the link to the repository with us. If you have deployed the app anywhere (Vercel, Netlify, etc.) then please share the url link to the deployment with us too.
+```
+delivro-task_jiri_mika/
+├── app/
+│   ├── api/              # API routes
+│   │   ├── invoices/     # Upload endpoint
+│   │   ├── shipments/    # Shipments a history endpoints
+│   │   └── companies/    # Companies endpoint
+│   ├── page.tsx          # Hlavní stránka
+│   └── layout.tsx        # Root layout
+├── components/           # React komponenty
+│   ├── UploadModal.tsx
+│   ├── PreviewTable.tsx
+│   ├── ShipmentsTable.tsx
+│   ├── PriceHistoryModal.tsx
+│   └── CompanyFilter.tsx
+├── lib/
+│   └── supabase/         # Supabase klienti
+│       ├── client.ts
+│       └── server.ts
+├── types/
+│   └── database.ts       # TypeScript typy
+├── supabase/
+│   └── migrations/       # SQL migrace
+└── vercel.json           # Vercel konfigurace
+```
+
+## API Endpoints
+
+### POST /api/invoices/upload
+Nahrání a zpracování JSON souboru s fakturními daty.
+
+**Request Body:**
+```json
+[
+  {
+    "id": "invoice_id",
+    "shipment": {
+      "id": "shipment_id",
+      "createdAt": "2025-10-30T04:01:45.903Z",
+      "trackingNumber": "208669628341",
+      "company": {
+        "id": "company_id",
+        "name": "Company Name"
+      },
+      "provider": "GLS",
+      "mode": "EXPORT",
+      "originCountry": "CZ",
+      "destinationCountry": "GP"
+    },
+    "invoicedWeight": 9.9,
+    "invoicedPrice": 302
+  }
+]
+```
+
+### GET /api/shipments
+Získání zásilek s nejnovějšími fakturními údaji.
+
+**Query Parameters:**
+- `company_id` (optional) - Filtrování podle společnosti
+- `page` (optional, default: 1) - Číslo stránky
+- `limit` (optional, default: 50) - Počet záznamů na stránku
+
+### GET /api/shipments/[id]/history
+Historie cen pro konkrétní zásilku.
+
+### GET /api/companies
+Seznam všech společností.
+
+## Deploy na Vercel
+
+1. **Push kódu na GitHub/GitLab**
+
+2. **Import projektu do Vercel**
+   - Přihlaste se na [Vercel](https://vercel.com)
+   - Klikněte na "New Project"
+   - Importujte váš repozitář
+
+3. **Nastavení Environment Variables**
+   V Vercel projektu přidejte následující environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+
+4. **Deploy**
+   - Vercel automaticky detekuje Next.js projekt
+   - Klikněte na "Deploy"
+   - Po dokončení deploye bude aplikace dostupná na URL poskytnuté Vercel
+
+## Databázové schéma
+
+### Tabulky
+
+- **companies** - Společnosti
+- **shipments** - Zásilky
+- **invoices** - Faktury (s historií)
+
+Všechny faktury se ukládají, dashboard zobrazuje pouze nejnovější fakturu pro každou zásilku.
+
+## Poznámky
+
+- Aplikace neobsahuje autentizaci (interní použití)
+- Při uploadu se automaticky aktualizují existující zásilky podle `shipment.id`
+- Všechny faktury se ukládají pro zachování historie
+- Aplikace je optimalizována pro práci s velkým množstvím dat pomocí paginace a indexů
+
+## Build
+
+```bash
+npm run build
+npm start
+```
+
+## License
+
+Tento projekt byl vytvořen jako testovací úloha pro Delivro.
