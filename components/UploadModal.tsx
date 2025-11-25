@@ -15,6 +15,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
   const [file, setFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<InvoiceInput[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -53,14 +54,32 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
   const handleUpload = async () => {
     if (!file || previewData.length === 0) return;
 
+    console.log('[UPLOAD FRONTEND] Starting upload...');
+    console.log('[UPLOAD FRONTEND] File:', file.name, 'Size:', file.size);
+    console.log('[UPLOAD FRONTEND] Invoice count:', previewData.length);
+
     setIsUploading(true);
     setError(null);
+    setUploadProgress('Příprava dat...');
+
+    let response: Response | null = null;
 
     try {
+      console.log('[UPLOAD FRONTEND] Reading file...');
+      setUploadProgress('Načítání souboru...');
       const text = await file.text();
+      console.log('[UPLOAD FRONTEND] File read, length:', text.length);
+      
+      console.log('[UPLOAD FRONTEND] Parsing JSON...');
+      setUploadProgress('Zpracování dat...');
       const data = JSON.parse(text);
+      console.log('[UPLOAD FRONTEND] JSON parsed, array length:', data.length);
 
-      const response = await fetch('/api/invoices/upload', {
+      console.log('[UPLOAD FRONTEND] Sending request to /api/invoices/upload...');
+      setUploadProgress(`Nahrávání ${data.length} faktur do databáze...`);
+      const startTime = Date.now();
+      
+      response = await fetch('/api/invoices/upload', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,13 +87,40 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Chyba při nahrávání dat');
+      const endTime = Date.now();
+      console.log(`[UPLOAD FRONTEND] Response received after ${endTime - startTime}ms`);
+      console.log('[UPLOAD FRONTEND] Response status:', response.status);
+      console.log('[UPLOAD FRONTEND] Response ok:', response.ok);
+      
+      setUploadProgress('Dokončování...');
+
+      // Try to parse response body
+      let result;
+      try {
+        const responseText = await response.text();
+        console.log('[UPLOAD FRONTEND] Response text length:', responseText.length);
+        
+        if (responseText) {
+          result = JSON.parse(responseText);
+          console.log('[UPLOAD FRONTEND] Response parsed successfully');
+        } else {
+          console.warn('[UPLOAD FRONTEND] Empty response body');
+          result = null;
+        }
+      } catch (parseError) {
+        console.error('[UPLOAD FRONTEND] Error parsing response:', parseError);
+        throw new Error('Chyba při parsování odpovědi ze serveru');
       }
 
-      const result = await response.json();
-      console.log('Upload successful:', result);
+      if (!response.ok) {
+        console.error('[UPLOAD FRONTEND] Response not OK');
+        console.error('[UPLOAD FRONTEND] Error data:', result);
+        const errorMessage = result?.error || result?.message || `Server vrátil chybu: ${response.status}`;
+        throw new Error(errorMessage);
+      }
+
+      console.log('[UPLOAD FRONTEND] Upload successful:', result);
+      setUploadProgress('Hotovo!');
 
       // Reset state
       setFile(null);
@@ -83,11 +129,28 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
         fileInputRef.current.value = '';
       }
 
-      onUploadSuccess();
-      onClose();
+      // Close modal and refresh data after short delay to show success message
+      setTimeout(() => {
+        setIsUploading(false);
+        setUploadProgress('');
+        onUploadSuccess();
+        onClose();
+      }, 500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Chyba při nahrávání dat');
-    } finally {
+      console.error('[UPLOAD FRONTEND] Error occurred:', err);
+      console.error('[UPLOAD FRONTEND] Error type:', err instanceof Error ? err.constructor.name : typeof err);
+      console.error('[UPLOAD FRONTEND] Error message:', err instanceof Error ? err.message : String(err));
+      console.error('[UPLOAD FRONTEND] Error stack:', err instanceof Error ? err.stack : 'No stack trace');
+      
+      // Check if data might have been uploaded despite error
+      if (response?.ok) {
+        console.warn('[UPLOAD FRONTEND] Response was OK but error occurred - data might be uploaded');
+        setError('Data byla pravděpodobně nahrána, ale došlo k chybě při zpracování odpovědi. Zkontrolujte dashboard.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Chyba při nahrávání dat');
+      setUploadProgress('');
+      }
+      
       setIsUploading(false);
     }
   };
@@ -154,6 +217,19 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
               )}
             </div>
           </div>
+
+          {/* Upload Progress */}
+          {isUploading && uploadProgress && (
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Prosím vyčkejte, nahrávání probíhá...</p>
+                  <p className="text-sm text-blue-700 mt-1">{uploadProgress}</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (

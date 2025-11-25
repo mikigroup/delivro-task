@@ -35,14 +35,22 @@ export default function PriceHistoryModal({
     setError(null);
 
     try {
+      console.log('[HISTORY MODAL] Fetching history for shipment:', shipmentId);
       const response = await fetch(`/api/shipments/${shipmentId}/history`);
+      
+      console.log('[HISTORY MODAL] Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Chyba při načítání historie');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[HISTORY MODAL] Error response:', errorData);
+        throw new Error(errorData.error || `Chyba při načítání historie (${response.status})`);
       }
 
       const data = await response.json();
+      console.log('[HISTORY MODAL] Received data:', data);
       setInvoices(data.invoices || []);
     } catch (err) {
+      console.error('[HISTORY MODAL] Error:', err);
       setError(err instanceof Error ? err.message : 'Chyba při načítání historie');
     } finally {
       setIsLoading(false);

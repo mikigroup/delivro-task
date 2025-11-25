@@ -18,6 +18,18 @@ interface ShipmentsTableProps {
 
 const columnHelper = createColumnHelper<ShipmentWithLatestInvoice>();
 
+// Barvy pro jednotlivé dopravce
+const getProviderColors = (provider: string) => {
+  const colors: Record<string, { bg: string; text: string }> = {
+    GLS: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+    DPD: { bg: 'bg-red-100', text: 'text-red-800' },
+    UPS: { bg: 'bg-amber-100', text: 'text-amber-800' },
+    PPL: { bg: 'bg-blue-100', text: 'text-blue-800' },
+    FedEx: { bg: 'bg-purple-100', text: 'text-purple-800' },
+  };
+  return colors[provider] || { bg: 'bg-gray-100', text: 'text-gray-800' };
+};
+
 export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
   const [data, setData] = useState<ShipmentWithLatestInvoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,11 +91,15 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
     }),
     columnHelper.accessor('provider', {
       header: 'Dopravce',
-      cell: (info) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {info.getValue()}
-        </span>
-      ),
+      cell: (info) => {
+        const provider = info.getValue();
+        const colors = getProviderColors(provider);
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
+            {provider}
+          </span>
+        );
+      },
     }),
     columnHelper.accessor('mode', {
       header: 'Režim',
@@ -182,8 +198,30 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
     );
   }
 
+  // Získat unikátní dopravce z dat pro legendu
+  const uniqueProviders = Array.from(new Set(data.map(item => item.provider))).sort();
+
   return (
     <>
+      {/* Legenda dopravců */}
+      {uniqueProviders.length > 0 && (
+        <div className="mb-4 p-4 bg-white border rounded-lg shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">Legenda dopravců:</h3>
+          <div className="flex flex-wrap gap-3">
+            {['GLS', 'DPD', 'UPS', 'PPL', 'FedEx'].map((provider) => {
+              const colors = getProviderColors(provider);
+              return (
+                <div key={provider} className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
+                    {provider}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">

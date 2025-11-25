@@ -26,3 +26,23 @@ You are given the following mock data presented in the following format:
 ```
 
 When a corrected invoice is given to us by the carrier, it will contain the same shipment object but a different invoice ID and of course a corrected `invoicedWeight` or `invoicedPrice`. In such case, you are expected to simply update the existing shipment with the new values instead of creating a new entry.
+
+### Test Data Files
+
+- **invoices_1.json** - Initial dataset with 567 invoices and 567 unique shipments
+- **invoices_2.json** - Additional dataset with 312 invoices and 312 unique shipments
+- **invoices_3.json** - Test file containing:
+  - Updated invoices for some shipments from invoices_1.json (same shipment.id, different invoice.id and prices) - for testing price history
+  - New shipments with unique IDs
+- **invoices_4.json** - Test file containing:
+  - Further price updates for shipments from previous files (testing multiple price changes)
+  - Additional new shipments
+  - Price updates for shipments from invoices_3.json
+
+### Testing Price History
+
+To test the price history feature:
+1. Upload `invoices_1.json` first
+2. Then upload `invoices_3.json` - this will add new invoices for existing shipments
+3. Then upload `invoices_4.json` - this will add more price updates
+4. Check the price history for shipments like `_7pRBN49W3qbIsdiqzYoZ` (tracking: 208669628341) - it should show multiple price entries
