@@ -21,12 +21,96 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
   if (!isOpen) return null;
 
+  const validateInvoiceData = (invoice: any, index: number): string | null => {
+    const errors: string[] = [];
+
+    if (!invoice.id) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí ID faktury`);
+    }
+
+    if (!invoice.shipment) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí údaje o zásilce`);
+      return errors.join('; ');
+    }
+
+    if (!invoice.shipment.id) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí ID zásilky`);
+    }
+
+    if (!invoice.shipment.trackingNumber) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí tracking number`);
+    }
+
+    if (!invoice.shipment.company) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí údaje o společnosti`);
+    } else {
+      if (!invoice.shipment.company.id) {
+        errors.push(`Faktura na pozici ${index + 1}: chybí ID společnosti`);
+      }
+      if (!invoice.shipment.company.name) {
+        errors.push(`Faktura na pozici ${index + 1}: chybí název společnosti`);
+      }
+    }
+
+    if (!invoice.shipment.provider) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí dopravce`);
+    } else if (!['GLS', 'DPD', 'UPS', 'PPL', 'FedEx'].includes(invoice.shipment.provider)) {
+      errors.push(`Faktura na pozici ${index + 1}: neplatný dopravce "${invoice.shipment.provider}" (povolené: GLS, DPD, UPS, PPL, FedEx)`);
+    }
+
+    if (!invoice.shipment.mode) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí režim zásilky`);
+    } else if (!['EXPORT', 'IMPORT'].includes(invoice.shipment.mode)) {
+      errors.push(`Faktura na pozici ${index + 1}: neplatný režim "${invoice.shipment.mode}" (povolené: EXPORT, IMPORT)`);
+    }
+
+    if (!invoice.shipment.originCountry) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí země původu`);
+    }
+
+    if (!invoice.shipment.destinationCountry) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí země určení`);
+    }
+
+    if (typeof invoice.invoicedWeight !== 'number' || isNaN(invoice.invoicedWeight)) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí nebo není platná váha (musí být číslo)`);
+    } else if (invoice.invoicedWeight <= 0) {
+      errors.push(`Faktura na pozici ${index + 1}: váha musí být větší než 0`);
+    }
+
+    if (typeof invoice.invoicedPrice !== 'number' || isNaN(invoice.invoicedPrice)) {
+      errors.push(`Faktura na pozici ${index + 1}: chybí nebo není platná cena (musí být číslo)`);
+    } else if (invoice.invoicedPrice < 0) {
+      errors.push(`Faktura na pozici ${index + 1}: cena nemůže být záporná`);
+    }
+
+    return errors.length > 0 ? errors.join('; ') : null;
+  };
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (!selectedFile) return;
 
     if (!selectedFile.name.endsWith('.json')) {
       setError('Prosím vyberte JSON soubor');
+      setFile(null);
+      setPreviewData([]);
+      return;
+    }
+
+    // Kontrola velikosti souboru (max 50MB)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (selectedFile.size > maxSize) {
+      setError(`Soubor je příliš velký (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB). Maximální velikost je 50 MB.`);
+      setFile(null);
+      setPreviewData([]);
+      return;
+    }
+
+    if (selectedFile.size === 0) {
+      setError('Soubor je prázdný');
+      setFile(null);
+      setPreviewData([]);
       return;
     }
 
@@ -35,17 +119,64 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
     try {
       const text = await selectedFile.text();
-      const data = JSON.parse(text);
+      
+      if (!text || text.trim().length === 0) {
+        setError('Soubor je prázdný nebo neobsahuje žádná data');
+        setFile(null);
+        setPreviewData([]);
+        return;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        setError('Soubor neobsahuje platný JSON. Zkontrolujte syntaxi JSON souboru.');
+        setFile(null);
+        setPreviewData([]);
+        return;
+      }
 
       if (!Array.isArray(data)) {
-        setError('JSON soubor musí obsahovat pole faktur');
+        setError('JSON soubor musí obsahovat pole (array) faktur. Soubor neobsahuje pole.');
         setFile(null);
+        setPreviewData([]);
+        return;
+      }
+
+      if (data.length === 0) {
+        setError('Soubor neobsahuje žádné faktury. Pole faktur je prázdné.');
+        setFile(null);
+        setPreviewData([]);
+        return;
+      }
+
+      // Validace každé faktury
+      const validationErrors: string[] = [];
+      for (let i = 0; i < data.length; i++) {
+        const error = validateInvoiceData(data[i], i);
+        if (error) {
+          validationErrors.push(error);
+        }
+      }
+
+      if (validationErrors.length > 0) {
+        // Zobrazíme maximálně 5 chyb, aby to nebylo příliš dlouhé
+        const errorsToShow = validationErrors.slice(0, 5);
+        const errorMessage = validationErrors.length > 5
+          ? `${errorsToShow.join('\n')}\n\n... a dalších ${validationErrors.length - 5} chyb.`
+          : errorsToShow.join('\n');
+        
+        setError(`Soubor obsahuje neplatná data:\n\n${errorMessage}`);
+        setFile(null);
+        setPreviewData([]);
         return;
       }
 
       setPreviewData(data);
     } catch (err) {
-      setError('Chyba při načítání JSON souboru');
+      console.error('[UPLOAD MODAL] Error loading file:', err);
+      setError(err instanceof Error ? `Chyba při načítání souboru: ${err.message}` : 'Chyba při načítání JSON souboru');
       setFile(null);
       setPreviewData([]);
     }
@@ -233,8 +364,18 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
           {/* Error Message */}
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              {error}
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-start gap-2">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-red-800 mb-1">Chyba validace</h4>
+                  <pre className="text-sm text-red-700 whitespace-pre-wrap font-sans">{error}</pre>
+                </div>
+              </div>
             </div>
           )}
 

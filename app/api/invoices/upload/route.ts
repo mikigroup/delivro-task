@@ -25,29 +25,94 @@ export async function POST(request: NextRequest) {
 
     // Validate each invoice structure
     console.log('[UPLOAD API] Validating invoice structure...');
-    for (const invoice of body) {
-      if (
-        !invoice.id ||
-        !invoice.shipment ||
-        !invoice.shipment.id ||
-        !invoice.shipment.trackingNumber ||
-        !invoice.shipment.company ||
-        !invoice.shipment.company.id ||
-        !invoice.shipment.company.name ||
-        !invoice.shipment.provider ||
-        !invoice.shipment.mode ||
-        !invoice.shipment.originCountry ||
-        !invoice.shipment.destinationCountry ||
-        typeof invoice.invoicedWeight !== 'number' ||
-        typeof invoice.invoicedPrice !== 'number'
-      ) {
-        console.error('[UPLOAD API] Invalid invoice structure:', invoice);
-        return NextResponse.json(
-          { error: 'Invalid invoice structure. Missing required fields.' },
-          { status: 400 }
-        );
+    const validationErrors: string[] = [];
+    
+    for (let i = 0; i < body.length; i++) {
+      const invoice = body[i];
+      const errors: string[] = [];
+
+      if (!invoice.id) {
+        errors.push(`Faktura ${i + 1}: chybí ID faktury`);
+      }
+
+      if (!invoice.shipment) {
+        errors.push(`Faktura ${i + 1}: chybí údaje o zásilce`);
+        validationErrors.push(...errors);
+        continue;
+      }
+
+      if (!invoice.shipment.id) {
+        errors.push(`Faktura ${i + 1}: chybí ID zásilky`);
+      }
+
+      if (!invoice.shipment.trackingNumber) {
+        errors.push(`Faktura ${i + 1}: chybí tracking number`);
+      }
+
+      if (!invoice.shipment.company) {
+        errors.push(`Faktura ${i + 1}: chybí údaje o společnosti`);
+      } else {
+        if (!invoice.shipment.company.id) {
+          errors.push(`Faktura ${i + 1}: chybí ID společnosti`);
+        }
+        if (!invoice.shipment.company.name) {
+          errors.push(`Faktura ${i + 1}: chybí název společnosti`);
+        }
+      }
+
+      if (!invoice.shipment.provider) {
+        errors.push(`Faktura ${i + 1}: chybí dopravce`);
+      } else if (!['GLS', 'DPD', 'UPS', 'PPL', 'FedEx'].includes(invoice.shipment.provider)) {
+        errors.push(`Faktura ${i + 1}: neplatný dopravce "${invoice.shipment.provider}" (povolené: GLS, DPD, UPS, PPL, FedEx)`);
+      }
+
+      if (!invoice.shipment.mode) {
+        errors.push(`Faktura ${i + 1}: chybí režim zásilky`);
+      } else if (!['EXPORT', 'IMPORT'].includes(invoice.shipment.mode)) {
+        errors.push(`Faktura ${i + 1}: neplatný režim "${invoice.shipment.mode}" (povolené: EXPORT, IMPORT)`);
+      }
+
+      if (!invoice.shipment.originCountry) {
+        errors.push(`Faktura ${i + 1}: chybí země původu`);
+      }
+
+      if (!invoice.shipment.destinationCountry) {
+        errors.push(`Faktura ${i + 1}: chybí země určení`);
+      }
+
+      if (typeof invoice.invoicedWeight !== 'number' || isNaN(invoice.invoicedWeight)) {
+        errors.push(`Faktura ${i + 1}: chybí nebo není platná váha (musí být číslo)`);
+      } else if (invoice.invoicedWeight <= 0) {
+        errors.push(`Faktura ${i + 1}: váha musí být větší než 0`);
+      }
+
+      if (typeof invoice.invoicedPrice !== 'number' || isNaN(invoice.invoicedPrice)) {
+        errors.push(`Faktura ${i + 1}: chybí nebo není platná cena (musí být číslo)`);
+      } else if (invoice.invoicedPrice < 0) {
+        errors.push(`Faktura ${i + 1}: cena nemůže být záporná`);
+      }
+
+      if (errors.length > 0) {
+        validationErrors.push(...errors);
       }
     }
+
+    if (validationErrors.length > 0) {
+      console.error('[UPLOAD API] Validation failed:', validationErrors);
+      const errorMessage = validationErrors.length > 10
+        ? validationErrors.slice(0, 10).join('; ') + ` ... a dalších ${validationErrors.length - 10} chyb`
+        : validationErrors.join('; ');
+      
+      return NextResponse.json(
+        { 
+          error: 'Neplatná struktura dat',
+          details: errorMessage,
+          errorCount: validationErrors.length
+        },
+        { status: 400 }
+      );
+    }
+    
     console.log('[UPLOAD API] Validation passed');
 
     // Check Supabase connection

@@ -12,13 +12,11 @@ export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleUploadSuccess = () => {
-    // Trigger refresh of shipments table
     setRefreshKey((prev) => prev + 1);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50">    
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -34,9 +32,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
         <div className="mb-6 flex items-center gap-4">
           <CompanyFilter
             selectedCompanyId={selectedCompanyId}
@@ -44,13 +40,11 @@ export default function Home() {
           />
         </div>
 
-        {/* Shipments Table */}
         <div key={refreshKey}>
           <ShipmentsTable companyId={selectedCompanyId} />
         </div>
       </main>
-
-      {/* Upload Modal */}
+    
       <UploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
