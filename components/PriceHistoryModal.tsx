@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X, Loader2 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import type { InvoiceHistory } from '@/types/database';
 
 interface PriceHistoryModalProps {
@@ -17,6 +18,8 @@ export default function PriceHistoryModal({
   shipmentId,
   trackingNumber,
 }: PriceHistoryModalProps) {
+  const t = useTranslations();
+  const locale = useLocale();
   const [invoices, setInvoices] = useState<InvoiceHistory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +46,7 @@ export default function PriceHistoryModal({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error('[HISTORY MODAL] Error response:', errorData);
-        throw new Error(errorData.error || `Chyba při načítání historie (${response.status})`);
+        throw new Error(errorData.error || t('priceHistory.loadingError'));
       }
 
       const data = await response.json();
@@ -51,7 +54,7 @@ export default function PriceHistoryModal({
       setInvoices(data.invoices || []);
     } catch (err) {
       console.error('[HISTORY MODAL] Error:', err);
-      setError(err instanceof Error ? err.message : 'Chyba při načítání historie');
+      setError(err instanceof Error ? err.message : t('priceHistory.loadingError'));
     } finally {
       setIsLoading(false);
     }
@@ -64,8 +67,8 @@ export default function PriceHistoryModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col m-4">
         <div className="flex items-center justify-between p-6 border-b">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Historie cen</h2>
-            <p className="text-sm text-gray-500 mt-1">Tracking: {trackingNumber}</p>
+            <h2 className="text-2xl font-semibold text-gray-900">{t('priceHistory.title')}</h2>
+            <p className="text-sm text-gray-500 mt-1">{t('priceHistory.tracking')}: {trackingNumber}</p>
           </div>
           <button
             onClick={onClose}
@@ -86,7 +89,7 @@ export default function PriceHistoryModal({
             </div>
           ) : invoices.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              Žádná historie faktur pro tuto zásilku
+              {t('priceHistory.noHistory')}
             </div>
           ) : (
             <div className="border rounded-lg overflow-hidden">
@@ -94,13 +97,13 @@ export default function PriceHistoryModal({
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Datum
+                      {t('priceHistory.date')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Váha (kg)
+                      {t('priceHistory.weight')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cena (CZK)
+                      {t('priceHistory.price')}
                     </th>
                   </tr>
                 </thead>
@@ -108,13 +111,13 @@ export default function PriceHistoryModal({
                   {invoices.map((invoice) => (
                     <tr key={invoice.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm text-gray-900">
-                        {new Date(invoice.created_at).toLocaleString('cs-CZ')}
+                        {new Date(invoice.created_at).toLocaleString(locale === 'cs' ? 'cs-CZ' : 'en-US')}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900">
                         {Number(invoice.invoiced_weight).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900">
-                        {Number(invoice.invoiced_price).toLocaleString('cs-CZ')}
+                        {Number(invoice.invoiced_price).toLocaleString(locale === 'cs' ? 'cs-CZ' : 'en-US')}
                       </td>
                     </tr>
                   ))}
@@ -129,7 +132,7 @@ export default function PriceHistoryModal({
             onClick={onClose}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
           >
-            Zavřít
+            {t('common.close')}
           </button>
         </div>
       </div>

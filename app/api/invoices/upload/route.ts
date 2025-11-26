@@ -248,8 +248,7 @@ export async function POST(request: NextRequest) {
     const newInvoicesToInsert = invoicesArray.filter(inv => !existingInvoiceIds.has(inv.id));
     const newInvoices = newInvoicesToInsert.length;
     console.log(`[UPLOAD API] Found ${existingInvoiceIds.size} existing invoices, ${newInvoices} new invoices to insert`);
-
-    // Batch insert new invoices
+    
     if (newInvoicesToInsert.length > 0) {
       console.log('[UPLOAD API] Batch inserting invoices...');
       const { error: invoiceError } = await supabaseAdmin

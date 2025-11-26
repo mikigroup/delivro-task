@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface TrackingNumberSearchProps {
   value: string;
@@ -9,7 +10,15 @@ interface TrackingNumberSearchProps {
 }
 
 export default function TrackingNumberSearch({ value, onChange }: TrackingNumberSearchProps) {
-  const [inputValue, setInputValue] = useState(value);
+  const t = useTranslations();
+  const [inputValue, setInputValue] = useState('');
+  const [mounted, setMounted] = useState(false);
+  
+  // Zajistit, že komponenta je mountovaná na klientovi
+  useEffect(() => {
+    setMounted(true);
+    setInputValue(value);
+  }, [value]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +38,9 @@ export default function TrackingNumberSearch({ value, onChange }: TrackingNumber
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Vyhledat podle tracking number..."
+          placeholder={mounted ? t('trackingSearch.placeholder') : ''}
           className="pl-10 pr-10 py-2 w-80 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          suppressHydrationWarning
         />
         {inputValue && (
           <button

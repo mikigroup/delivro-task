@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { X, Upload, FileText } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import PreviewTable from './PreviewTable';
 import type { InvoiceInput } from '@/types/database';
 
@@ -12,6 +13,7 @@ interface UploadModalProps {
 }
 
 export default function UploadModal({ isOpen, onClose, onUploadSuccess }: UploadModalProps) {
+  const t = useTranslations();
   const [file, setFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<InvoiceInput[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -23,65 +25,66 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
   const validateInvoiceData = (invoice: any, index: number): string | null => {
     const errors: string[] = [];
+    const indexNum = index + 1;
 
     if (!invoice.id) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí ID faktury`);
+      errors.push(t('validation.missingInvoiceId', { index: indexNum }));
     }
 
     if (!invoice.shipment) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí údaje o zásilce`);
+      errors.push(t('validation.missingShipment', { index: indexNum }));
       return errors.join('; ');
     }
 
     if (!invoice.shipment.id) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí ID zásilky`);
+      errors.push(t('validation.missingShipmentId', { index: indexNum }));
     }
 
     if (!invoice.shipment.trackingNumber) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí tracking number`);
+      errors.push(t('validation.missingTrackingNumber', { index: indexNum }));
     }
 
     if (!invoice.shipment.company) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí údaje o společnosti`);
+      errors.push(t('validation.missingCompany', { index: indexNum }));
     } else {
       if (!invoice.shipment.company.id) {
-        errors.push(`Faktura na pozici ${index + 1}: chybí ID společnosti`);
+        errors.push(t('validation.missingCompanyId', { index: indexNum }));
       }
       if (!invoice.shipment.company.name) {
-        errors.push(`Faktura na pozici ${index + 1}: chybí název společnosti`);
+        errors.push(t('validation.missingCompanyName', { index: indexNum }));
       }
     }
 
     if (!invoice.shipment.provider) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí dopravce`);
+      errors.push(t('validation.missingProvider', { index: indexNum }));
     } else if (!['GLS', 'DPD', 'UPS', 'PPL', 'FedEx'].includes(invoice.shipment.provider)) {
-      errors.push(`Faktura na pozici ${index + 1}: neplatný dopravce "${invoice.shipment.provider}" (povolené: GLS, DPD, UPS, PPL, FedEx)`);
+      errors.push(t('validation.invalidProvider', { index: indexNum, provider: invoice.shipment.provider }));
     }
 
     if (!invoice.shipment.mode) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí režim zásilky`);
+      errors.push(t('validation.missingMode', { index: indexNum }));
     } else if (!['EXPORT', 'IMPORT'].includes(invoice.shipment.mode)) {
-      errors.push(`Faktura na pozici ${index + 1}: neplatný režim "${invoice.shipment.mode}" (povolené: EXPORT, IMPORT)`);
+      errors.push(t('validation.invalidMode', { index: indexNum, mode: invoice.shipment.mode }));
     }
 
     if (!invoice.shipment.originCountry) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí země původu`);
+      errors.push(t('validation.missingOriginCountry', { index: indexNum }));
     }
 
     if (!invoice.shipment.destinationCountry) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí země určení`);
+      errors.push(t('validation.missingDestinationCountry', { index: indexNum }));
     }
 
     if (typeof invoice.invoicedWeight !== 'number' || isNaN(invoice.invoicedWeight)) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí nebo není platná váha (musí být číslo)`);
+      errors.push(t('validation.invalidWeight', { index: indexNum }));
     } else if (invoice.invoicedWeight <= 0) {
-      errors.push(`Faktura na pozici ${index + 1}: váha musí být větší než 0`);
+      errors.push(t('validation.weightMustBePositive', { index: indexNum }));
     }
 
     if (typeof invoice.invoicedPrice !== 'number' || isNaN(invoice.invoicedPrice)) {
-      errors.push(`Faktura na pozici ${index + 1}: chybí nebo není platná cena (musí být číslo)`);
+      errors.push(t('validation.invalidPrice', { index: indexNum }));
     } else if (invoice.invoicedPrice < 0) {
-      errors.push(`Faktura na pozici ${index + 1}: cena nemůže být záporná`);
+      errors.push(t('validation.priceCannotBeNegative', { index: indexNum }));
     }
 
     return errors.length > 0 ? errors.join('; ') : null;
@@ -92,7 +95,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
     if (!selectedFile) return;
 
     if (!selectedFile.name.endsWith('.json')) {
-      setError('Prosím vyberte JSON soubor');
+      setError(t('uploadModal.errors.invalidFile'));
       setFile(null);
       setPreviewData([]);
       return;
@@ -101,14 +104,14 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
     // Kontrola velikosti souboru (max 50MB)
     const maxSize = 50 * 1024 * 1024; // 50MB
     if (selectedFile.size > maxSize) {
-      setError(`Soubor je příliš velký (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB). Maximální velikost je 50 MB.`);
+      setError(t('uploadModal.errors.fileTooLarge', { size: (selectedFile.size / 1024 / 1024).toFixed(2) }));
       setFile(null);
       setPreviewData([]);
       return;
     }
 
     if (selectedFile.size === 0) {
-      setError('Soubor je prázdný');
+      setError(t('uploadModal.errors.emptyFile'));
       setFile(null);
       setPreviewData([]);
       return;
@@ -121,7 +124,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       const text = await selectedFile.text();
       
       if (!text || text.trim().length === 0) {
-        setError('Soubor je prázdný nebo neobsahuje žádná data');
+        setError(t('uploadModal.errors.emptyFile'));
         setFile(null);
         setPreviewData([]);
         return;
@@ -131,21 +134,21 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       try {
         data = JSON.parse(text);
       } catch (parseError) {
-        setError('Soubor neobsahuje platný JSON. Zkontrolujte syntaxi JSON souboru.');
+        setError(t('uploadModal.errors.invalidJson'));
         setFile(null);
         setPreviewData([]);
         return;
       }
 
       if (!Array.isArray(data)) {
-        setError('JSON soubor musí obsahovat pole (array) faktur. Soubor neobsahuje pole.');
+        setError(t('uploadModal.errors.notArray'));
         setFile(null);
         setPreviewData([]);
         return;
       }
 
       if (data.length === 0) {
-        setError('Soubor neobsahuje žádné faktury. Pole faktur je prázdné.');
+        setError(t('uploadModal.errors.emptyArray'));
         setFile(null);
         setPreviewData([]);
         return;
@@ -164,10 +167,10 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
         // Zobrazíme maximálně 5 chyb, aby to nebylo příliš dlouhé
         const errorsToShow = validationErrors.slice(0, 5);
         const errorMessage = validationErrors.length > 5
-          ? `${errorsToShow.join('\n')}\n\n... a dalších ${validationErrors.length - 5} chyb.`
+          ? `${errorsToShow.join('\n')}\n\n${t('uploadModal.errors.andMore', { count: validationErrors.length - 5 })}`
           : errorsToShow.join('\n');
         
-        setError(`Soubor obsahuje neplatná data:\n\n${errorMessage}`);
+        setError(`${t('uploadModal.errors.invalidData')}\n\n${errorMessage}`);
         setFile(null);
         setPreviewData([]);
         return;
@@ -197,17 +200,17 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
 
     try {
       console.log('[UPLOAD FRONTEND] Reading file...');
-      setUploadProgress('Načítání souboru...');
+      setUploadProgress(t('uploadModal.loadingFile'));
       const text = await file.text();
       console.log('[UPLOAD FRONTEND] File read, length:', text.length);
       
       console.log('[UPLOAD FRONTEND] Parsing JSON...');
-      setUploadProgress('Zpracování dat...');
+      setUploadProgress(t('uploadModal.processing'));
       const data = JSON.parse(text);
       console.log('[UPLOAD FRONTEND] JSON parsed, array length:', data.length);
 
       console.log('[UPLOAD FRONTEND] Sending request to /api/invoices/upload...');
-      setUploadProgress(`Nahrávání ${data.length} faktur do databáze...`);
+      setUploadProgress(t('uploadModal.uploadingToDb', { count: data.length }));
       const startTime = Date.now();
       
       response = await fetch('/api/invoices/upload', {
@@ -223,7 +226,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       console.log('[UPLOAD FRONTEND] Response status:', response.status);
       console.log('[UPLOAD FRONTEND] Response ok:', response.ok);
       
-      setUploadProgress('Dokončování...');
+      setUploadProgress(t('uploadModal.completing'));
 
       // Try to parse response body
       let result;
@@ -251,7 +254,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
       }
 
       console.log('[UPLOAD FRONTEND] Upload successful:', result);
-      setUploadProgress('Hotovo!');
+      setUploadProgress(t('uploadModal.done'));
 
       // Reset state
       setFile(null);
@@ -318,7 +321,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
           {/* File Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Vyberte JSON soubor
+              {t('uploadModal.selectFile')}
             </label>
             <div className="flex items-center gap-4">
               <input
@@ -335,7 +338,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Upload size={20} />
-                Vybrat soubor
+                {t('uploadModal.chooseFile')}
               </label>
               {file && (
                 <div className="flex items-center gap-2 text-gray-700">
@@ -355,7 +358,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
               <div className="flex items-center gap-3">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
                 <div>
-                  <p className="text-sm font-medium text-blue-900">Prosím vyčkejte, nahrávání probíhá...</p>
+                  <p className="text-sm font-medium text-blue-900">{t('uploadModal.pleaseWait')}</p>
                   <p className="text-sm text-blue-700 mt-1">{uploadProgress}</p>
                 </div>
               </div>
@@ -372,7 +375,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-red-800 mb-1">Chyba validace</h4>
+                  <h4 className="text-sm font-semibold text-red-800 mb-1">{t('uploadModal.validationError')}</h4>
                   <pre className="text-sm text-red-700 whitespace-pre-wrap font-sans">{error}</pre>
                 </div>
               </div>
@@ -383,7 +386,7 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
           {previewData.length > 0 && (
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Náhled dat ({previewData.length} faktur)
+                {t('uploadModal.preview')} ({previewData.length} {t('previewTable.invoices')})
               </h3>
               <PreviewTable data={previewData} />
             </div>
@@ -397,14 +400,14 @@ export default function UploadModal({ isOpen, onClose, onUploadSuccess }: Upload
             disabled={isUploading}
             className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 disabled:opacity-50"
           >
-            Zrušit
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleUpload}
             disabled={!file || previewData.length === 0 || isUploading}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUploading ? 'Nahrávání...' : 'Potvrdit nahrání'}
+            {isUploading ? t('uploadModal.uploading') : t('uploadModal.confirmUpload')}
           </button>
         </div>
       </div>

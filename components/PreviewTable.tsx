@@ -7,8 +7,9 @@ import {
   flexRender,
   createColumnHelper,
 } from '@tanstack/react-table';
-import type { InvoiceInput } from '@/types/database';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import type { InvoiceInput } from '@/types/database';
 
 interface PreviewTableProps {
   data: InvoiceInput[];
@@ -17,26 +18,28 @@ interface PreviewTableProps {
 const columnHelper = createColumnHelper<InvoiceInput>();
 
 export default function PreviewTable({ data }: PreviewTableProps) {
+  const t = useTranslations();
+  const locale = useLocale();
   const columns = [
     columnHelper.accessor('shipment.trackingNumber', {
-      header: 'Tracking Number',
+      header: t('shipmentsTable.trackingNumber'),
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('shipment.company.name', {
-      header: 'Společnost',
+      header: t('previewTable.company'),
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('shipment.provider', {
-      header: 'Dopravce',
+      header: t('previewTable.provider'),
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('invoicedWeight', {
-      header: 'Váha (kg)',
+      header: t('previewTable.weight'),
       cell: (info) => info.getValue().toFixed(2),
     }),
     columnHelper.accessor('invoicedPrice', {
-      header: 'Cena (CZK)',
-      cell: (info) => info.getValue().toLocaleString('cs-CZ'),
+      header: t('previewTable.price'),
+      cell: (info) => info.getValue().toLocaleString(locale === 'cs' ? 'cs-CZ' : 'en-US'),
     }),
   ];
 
@@ -88,12 +91,12 @@ export default function PreviewTable({ data }: PreviewTableProps) {
 
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
         <div className="text-sm text-gray-700">
-          Zobrazeno {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} -{' '}
+          {t('common.showing')} {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} -{' '}
           {Math.min(
             (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
             data.length
           )}{' '}
-          z {data.length} faktur
+          {t('common.of')} {data.length} {t('previewTable.invoices')}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -104,7 +107,7 @@ export default function PreviewTable({ data }: PreviewTableProps) {
             <ChevronLeft size={20} />
           </button>
           <span className="text-sm text-gray-700">
-            Strana {table.getState().pagination.pageIndex + 1} z {table.getPageCount()}
+            {t('common.page')} {table.getState().pagination.pageIndex + 1} {t('common.of')} {table.getPageCount()}
           </span>
           <button
             onClick={() => table.nextPage()}

@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-table';
 import { History, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslations, useLocale } from 'next-intl';
 import type { ShipmentWithLatestInvoice } from '@/types/database';
 import PriceHistoryModal from './PriceHistoryModal';
 
@@ -45,6 +46,8 @@ const getProviderLogo = (provider: string): string => {
 };
 
 export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsTableProps) {
+  const t = useTranslations();
+  const locale = useLocale();
   const [data, setData] = useState<ShipmentWithLatestInvoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,17 +101,17 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
 
   const columns = [
     columnHelper.accessor('tracking_number', {
-      header: 'Tracking Number',
+      header: t('shipmentsTable.trackingNumber'),
       cell: (info) => (
         <span className="font-mono text-sm">{info.getValue()}</span>
       ),
     }),
     columnHelper.accessor('company.name', {
-      header: 'Společnost',
+      header: t('shipmentsTable.company'),
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('provider', {
-      header: 'Dopravce',
+      header: t('shipmentsTable.provider'),
       cell: (info) => {
         const provider = info.getValue();
         const colors = getProviderColors(provider);
@@ -120,7 +123,7 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
       },
     }),
     columnHelper.accessor('mode', {
-      header: 'Režim',
+      header: t('shipmentsTable.mode'),
       cell: (info) => (
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -134,7 +137,7 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
       ),
     }),
     columnHelper.accessor('origin_country', {
-      header: 'Země',
+      header: t('shipmentsTable.country'),
       cell: (info) => (
         <span className="text-sm">
           {info.row.original.origin_country} → {info.row.original.destination_country}
@@ -142,22 +145,22 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
       ),
     }),
     columnHelper.accessor('latest_invoice.invoiced_weight', {
-      header: 'Váha (kg)',
+      header: t('shipmentsTable.weight'),
       cell: (info) => {
         const weight = info.getValue();
         return weight ? Number(weight).toFixed(2) : '-';
       },
     }),
     columnHelper.accessor('latest_invoice.invoiced_price', {
-      header: 'Cena (CZK)',
+      header: t('shipmentsTable.price'),
       cell: (info) => {
         const price = info.getValue();
-        return price ? Number(price).toLocaleString('cs-CZ') : '-';
+        return price ? Number(price).toLocaleString(locale === 'cs' ? 'cs-CZ' : 'en-US') : '-';
       },
     }),
     columnHelper.display({
       id: 'actions',
-      header: 'Akce',
+      header: t('shipmentsTable.actions'),
       cell: (info) => (
         <button
           onClick={() =>
@@ -169,7 +172,7 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
           className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded"
         >
           <History size={16} />
-          Historie
+          {t('shipmentsTable.history')}
         </button>
       ),
     }),
@@ -255,16 +258,16 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
 
         {data.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            Žádné zásilky k zobrazení
+            {t('shipmentsTable.noShipments')}
           </div>
         )}
         
         {pagination.totalPages > 0 && (
           <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
             <div className="text-sm text-gray-700">
-              Zobrazeno {pagination.page * pagination.limit - pagination.limit + 1} -{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} z{' '}
-              {pagination.total} zásilek
+              {t('common.showing')} {pagination.page * pagination.limit - pagination.limit + 1} -{' '}
+              {Math.min(pagination.page * pagination.limit, pagination.total)} {t('common.of')}{' '}
+              {pagination.total} {t('shipmentsTable.shipments')}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -275,7 +278,7 @@ export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsT
                 <ChevronLeft size={20} />
               </button>
               <span className="text-sm text-gray-700">
-                Strana {pagination.page} z {pagination.totalPages}
+                {t('common.page')} {pagination.page} {t('common.of')} {pagination.totalPages}
               </span>
               <button
                 onClick={() => fetchShipments(pagination.page + 1)}

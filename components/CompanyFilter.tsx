@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { Company } from '@/types/database';
 
 interface CompanyFilterProps {
@@ -10,6 +11,7 @@ interface CompanyFilterProps {
 }
 
 export default function CompanyFilter({ selectedCompanyId, onCompanyChange }: CompanyFilterProps) {
+  const t = useTranslations();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +43,7 @@ export default function CompanyFilter({ selectedCompanyId, onCompanyChange }: Co
         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <span className="text-sm font-medium text-gray-700">
-          {selectedCompany ? selectedCompany.name : 'Všechny společnosti'}
+          {selectedCompany ? selectedCompany.name : t('companyFilter.allCompanies')}
         </span>
         <ChevronDown size={16} className="text-gray-500" />
       </button>
@@ -54,7 +56,7 @@ export default function CompanyFilter({ selectedCompanyId, onCompanyChange }: Co
           />
           <div className="absolute z-20 mt-1 w-64 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
             {isLoading ? (
-              <div className="px-4 py-2 text-sm text-gray-500">Načítání...</div>
+              <div className="px-4 py-2 text-sm text-gray-500">{t('common.loading')}</div>
             ) : (
               <>
                 <button
@@ -66,7 +68,7 @@ export default function CompanyFilter({ selectedCompanyId, onCompanyChange }: Co
                     !selectedCompanyId ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                   }`}
                 >
-                  Všechny společnosti
+                  {t('companyFilter.allCompanies')}
                 </button>
                 {companies.map((company) => (
                   <button

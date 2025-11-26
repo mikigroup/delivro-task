@@ -1,0 +1,101 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "error": "Error",
+    "all": "All",
+    "page": "Page",
+    "of": "of",
+    "showing": "Showing",
+    "to": "to",
+    "from": "from"
+  },
+  "dashboard": {
+    "title": "Delivro Dashboard",
+    "uploadInvoices": "Upload Invoices"
+  },
+  "companyFilter": {
+    "allCompanies": "All Companies"
+  },
+  "trackingSearch": {
+    "placeholder": "Search by tracking number..."
+  },
+  "shipmentsTable": {
+    "trackingNumber": "Tracking Number",
+    "company": "Company",
+    "provider": "Provider",
+    "mode": "Mode",
+    "country": "Country",
+    "weight": "Weight (kg)",
+    "price": "Price (CZK)",
+    "actions": "Actions",
+    "history": "History",
+    "noShipments": "No shipments to display",
+    "shipments": "shipments",
+    "providers": "Providers"
+  },
+  "previewTable": {
+    "company": "Company",
+    "provider": "Provider",
+    "weight": "Weight (kg)",
+    "price": "Price (CZK)",
+    "invoices": "invoices"
+  },
+  "uploadModal": {
+    "title": "Upload Invoices",
+    "selectFile": "Select JSON File",
+    "chooseFile": "Choose File",
+    "preview": "Preview",
+    "uploading": "Uploading...",
+    "pleaseWait": "Please wait, upload in progress...",
+    "validationError": "Validation Error",
+    "confirmUpload": "Confirm Upload",
+    "preparing": "Preparing data...",
+    "loadingFile": "Loading file...",
+    "processing": "Processing data...",
+    "uploadingToDb": "Uploading {count} invoices to database...",
+    "completing": "Completing...",
+    "done": "Done!",
+    "errors": {
+      "invalidFile": "Please select a JSON file",
+      "fileTooLarge": "File is too large ({size} MB). Maximum size is 50 MB.",
+      "emptyFile": "File is empty",
+      "invalidJson": "File does not contain valid JSON. Please check the JSON file syntax.",
+      "notArray": "JSON file must contain an array of invoices. File does not contain an array.",
+      "emptyArray": "File does not contain any invoices. Invoice array is empty.",
+      "invalidData": "File contains invalid data:",
+      "andMore": "... and {count} more errors."
+    }
+  },
+  "priceHistory": {
+    "title": "Price History",
+    "tracking": "Tracking",
+    "date": "Date",
+    "weight": "Weight (kg)",
+    "price": "Price (CZK)",
+    "noHistory": "No invoice history for this shipment",
+    "loadingError": "Error loading history"
+  },
+  "validation": {
+    "missingInvoiceId": "Invoice {index}: missing invoice ID",
+    "missingShipment": "Invoice {index}: missing shipment data",
+    "missingShipmentId": "Invoice {index}: missing shipment ID",
+    "missingTrackingNumber": "Invoice {index}: missing tracking number",
+    "missingCompany": "Invoice {index}: missing company data",
+    "missingCompanyId": "Invoice {index}: missing company ID",
+    "missingCompanyName": "Invoice {index}: missing company name",
+    "missingProvider": "Invoice {index}: missing provider",
+    "invalidProvider": "Invoice {index}: invalid provider \"{provider}\" (allowed: GLS, DPD, UPS, PPL, FedEx)",
+    "missingMode": "Invoice {index}: missing shipment mode",
+    "invalidMode": "Invoice {index}: invalid mode \"{mode}\" (allowed: EXPORT, IMPORT)",
+    "missingOriginCountry": "Invoice {index}: missing origin country",
+    "missingDestinationCountry": "Invoice {index}: missing destination country",
+    "invalidWeight": "Invoice {index}: missing or invalid weight (must be a number)",
+    "weightMustBePositive": "Invoice {index}: weight must be greater than 0",
+    "invalidPrice": "Invoice {index}: missing or invalid price (must be a number)",
+    "priceCannotBeNegative": "Invoice {index}: price cannot be negative"
+  }
+}
+
