@@ -62,7 +62,6 @@ export default function PriceHistoryModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col m-4">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">Historie cen</h2>
@@ -76,7 +75,6 @@ export default function PriceHistoryModal({
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -126,7 +124,6 @@ export default function PriceHistoryModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-end p-6 border-t">
           <button
             onClick={onClose}

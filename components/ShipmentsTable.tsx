@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,11 +9,13 @@ import {
   createColumnHelper,
 } from '@tanstack/react-table';
 import { History, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import type { ShipmentWithLatestInvoice } from '@/types/database';
 import PriceHistoryModal from './PriceHistoryModal';
 
 interface ShipmentsTableProps {
   companyId: string | null;
+  trackingNumber?: string;
 }
 
 const columnHelper = createColumnHelper<ShipmentWithLatestInvoice>();
@@ -30,7 +32,19 @@ const getProviderColors = (provider: string) => {
   return colors[provider] || { bg: 'bg-gray-100', text: 'text-gray-800' };
 };
 
-export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
+// Helper funkce pro získání cesty k SVG logu dopravce
+const getProviderLogo = (provider: string): string => {
+  const logoMap: Record<string, string> = {
+    GLS: '/assets/gls.svg',
+    DPD: '/assets/dpd.svg',
+    UPS: '/assets/ups.svg',
+    PPL: '/assets/ppl.svg',
+    FedEx: '/assets/fedex.svg',
+  };
+  return logoMap[provider] || '';
+};
+
+export default function ShipmentsTable({ companyId, trackingNumber }: ShipmentsTableProps) {
   const [data, setData] = useState<ShipmentWithLatestInvoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +59,7 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
     trackingNumber: string;
   } | null>(null);
 
-  const fetchShipments = async (page: number = 1) => {
+  const fetchShipments = useCallback(async (page: number = 1) => {
     setIsLoading(true);
     setError(null);
 
@@ -57,6 +71,10 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
 
       if (companyId) {
         params.append('company_id', companyId);
+      }
+
+      if (trackingNumber && trackingNumber.trim()) {
+        params.append('tracking_number', trackingNumber.trim());
       }
 
       const response = await fetch(`/api/shipments?${params.toString()}`);
@@ -72,11 +90,11 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [companyId, trackingNumber, pagination.limit]);
 
   useEffect(() => {
     fetchShipments(1);
-  }, [companyId]);
+  }, [fetchShipments]);
 
   const columns = [
     columnHelper.accessor('tracking_number', {
@@ -198,30 +216,10 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
     );
   }
 
-  // Získat unikátní dopravce z dat pro legendu
   const uniqueProviders = Array.from(new Set(data.map(item => item.provider))).sort();
 
   return (
-    <>
-      {/* Legenda dopravců */}
-      {uniqueProviders.length > 0 && (
-        <div className="mb-4 p-4 bg-white border rounded-lg shadow-sm">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Legenda dopravců:</h3>
-          <div className="flex flex-wrap gap-3">
-            {['GLS', 'DPD', 'UPS', 'PPL', 'FedEx'].map((provider) => {
-              const colors = getProviderColors(provider);
-              return (
-                <div key={provider} className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}>
-                    {provider}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
+    <>      
       <div className="border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -260,8 +258,7 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
             Žádné zásilky k zobrazení
           </div>
         )}
-
-        {/* Pagination */}
+        
         {pagination.totalPages > 0 && (
           <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t">
             <div className="text-sm text-gray-700">
@@ -292,7 +289,6 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
         )}
       </div>
 
-      {/* Price History Modal */}
       {selectedShipment && (
         <PriceHistoryModal
           isOpen={!!selectedShipment}
@@ -300,6 +296,34 @@ export default function ShipmentsTable({ companyId }: ShipmentsTableProps) {
           shipmentId={selectedShipment.id}
           trackingNumber={selectedShipment.trackingNumber}
         />
+      )}
+
+{uniqueProviders.length > 0 && (
+        <div className="mb-4 p-4 bg-white border rounded-lg shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">Dopravci:</h3>
+          <div className="flex flex-wrap gap-4 items-center">
+            {['GLS', 'DPD', 'UPS', 'PPL', 'FedEx'].map((provider) => {              
+              const logoPath = getProviderLogo(provider);
+              return (
+                <div key={provider} className="flex items-center gap-2">
+                                    
+                  {logoPath && (
+                    <div className="relative w-20 h-10 flex items-center">
+                      <Image
+                        src={logoPath}
+                        alt={provider}
+                        width={40}
+                        height={40}
+                        className="object-contain"
+                        unoptimized
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </>
   );

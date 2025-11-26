@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const companyId = searchParams.get('company_id');
+    const trackingNumber = searchParams.get('tracking_number');
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '50', 10);
     const offset = (page - 1) * limit;
@@ -23,6 +24,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('company_id', companyId);
     }
 
+    // Apply tracking number filter if provided
+    if (trackingNumber && trackingNumber.trim()) {
+      query = query.ilike('tracking_number', `%${trackingNumber.trim()}%`);
+    }
+
     // Get total count for pagination
     let countQuery = supabaseAdmin
       .from('shipments')
@@ -30,6 +36,10 @@ export async function GET(request: NextRequest) {
 
     if (companyId) {
       countQuery = countQuery.eq('company_id', companyId);
+    }
+
+    if (trackingNumber && trackingNumber.trim()) {
+      countQuery = countQuery.ilike('tracking_number', `%${trackingNumber.trim()}%`);
     }
 
     const { count } = await countQuery;

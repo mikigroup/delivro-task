@@ -133,20 +133,22 @@ export async function POST(request: NextRequest) {
 
     console.log('[UPLOAD API] Preparing batch operations...');
     
-    // Collect unique companies
+    // Collect unique companies, shipments, and invoices
+    // Using Map ensures that objects with the same ID are deduplicated
+    // According to requirements: objects with same id will always contain the same exact data
     const companiesMap = new Map<string, { id: string; name: string }>();
     const shipmentsMap = new Map<string, any>();
-    const invoicesToInsert: any[] = [];
-    const invoiceIds = body.map((inv: InvoiceInput) => inv.id);
+    const invoicesMap = new Map<string, any>();
 
     for (const invoiceData of body as InvoiceInput[]) {
-      // Collect companies
+      // Collect companies (deduplicated by ID)
       companiesMap.set(invoiceData.shipment.company.id, {
         id: invoiceData.shipment.company.id,
         name: invoiceData.shipment.company.name,
       });
 
-      // Collect shipments
+      // Collect shipments (deduplicated by ID)
+      // If same shipment.id appears multiple times, it will be overwritten with same data
       shipmentsMap.set(invoiceData.shipment.id, {
         id: invoiceData.shipment.id,
         tracking_number: invoiceData.shipment.trackingNumber,
@@ -159,8 +161,9 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       });
 
-      // Collect invoices
-      invoicesToInsert.push({
+      // Collect invoices (deduplicated by ID)
+      // If same invoice.id appears multiple times, it will be overwritten with same data
+      invoicesMap.set(invoiceData.id, {
         id: invoiceData.id,
         shipment_id: invoiceData.shipment.id,
         invoiced_weight: invoiceData.invoicedWeight,
@@ -168,7 +171,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log(`[UPLOAD API] Collected ${companiesMap.size} unique companies, ${shipmentsMap.size} shipments, ${invoicesToInsert.length} invoices`);
+    const invoicesArray = Array.from(invoicesMap.values());
+    const invoiceIds = invoicesArray.map((inv: any) => inv.id);
+
+    console.log(`[UPLOAD API] Collected ${companiesMap.size} unique companies, ${shipmentsMap.size} unique shipments, ${invoicesMap.size} unique invoices (from ${body.length} total items)`);
 
     // Batch upsert companies
     console.log('[UPLOAD API] Batch upserting companies...');
@@ -239,7 +245,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingInvoiceIds = new Set((existingInvoices || []).map((inv: any) => inv.id));
-    const newInvoicesToInsert = invoicesToInsert.filter(inv => !existingInvoiceIds.has(inv.id));
+    const newInvoicesToInsert = invoicesArray.filter(inv => !existingInvoiceIds.has(inv.id));
     const newInvoices = newInvoicesToInsert.length;
     console.log(`[UPLOAD API] Found ${existingInvoiceIds.size} existing invoices, ${newInvoices} new invoices to insert`);
 

@@ -5,10 +5,12 @@ import { Upload } from 'lucide-react';
 import UploadModal from '@/components/UploadModal';
 import ShipmentsTable from '@/components/ShipmentsTable';
 import CompanyFilter from '@/components/CompanyFilter';
+import TrackingNumberSearch from '@/components/TrackingNumberSearch';
 
 export default function Home() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [trackingNumber, setTrackingNumber] = useState<string>('');
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleUploadSuccess = () => {
@@ -38,10 +40,14 @@ export default function Home() {
             selectedCompanyId={selectedCompanyId}
             onCompanyChange={setSelectedCompanyId}
           />
+          <TrackingNumberSearch
+            value={trackingNumber}
+            onChange={setTrackingNumber}
+          />
         </div>
 
         <div key={refreshKey}>
-          <ShipmentsTable companyId={selectedCompanyId} />
+          <ShipmentsTable companyId={selectedCompanyId} trackingNumber={trackingNumber} />
         </div>
       </main>
     
