@@ -13,8 +13,7 @@ export default function TrackingNumberSearch({ value, onChange }: TrackingNumber
   const t = useTranslations();
   const [inputValue, setInputValue] = useState('');
   const [mounted, setMounted] = useState(false);
-  
-  // Zajistit, že komponenta je mountovaná na klientovi
+    
   useEffect(() => {
     setMounted(true);
     setInputValue(value);

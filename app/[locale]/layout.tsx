@@ -20,6 +20,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Delivro Dashboard",
   description: "Dashboard for managing invoices and shipments",
+  keywords: ["dashboard", "invoices", "shipments"],
+  authors: [{ name: "Jiri Mika" }],
+  openGraph: {
+    title: "Delivro Dashboard",
+    description: "Dashboard for managing invoices and shipments",
+    type: "website",
+  },
 };
 
 type Props = {
@@ -28,14 +35,11 @@ type Props = {
 };
 
 export default async function LocaleLayout({children, params}: Props) {
-  // Ensure that the incoming `locale` is valid
   const {locale} = await params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 
-  // Providing all messages to the client
-  // side is the easiest way to get started
   const messages = await getMessages();
 
   return (
