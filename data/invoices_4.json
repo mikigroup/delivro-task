@@ -1,0 +1,129 @@
+[
+  {
+    "id": "inv4_001_final_price",
+    "shipment": {
+      "id": "_7pRBN49W3qbIsdiqzYoZ",
+      "createdAt": "2025-10-30T04:01:45.903Z",
+      "trackingNumber": "208669628341",
+      "company": {
+        "id": "fGZvzkW7AW696vc97qb1-",
+        "name": "Lynch - Bartoletti"
+      },
+      "provider": "GLS",
+      "mode": "EXPORT",
+      "originCountry": "CZ",
+      "destinationCountry": "GP"
+    },
+    "invoicedWeight": 9.9,
+    "invoicedPrice": 380
+  },
+  {
+    "id": "inv4_002_final_price",
+    "shipment": {
+      "id": "ywxk-IHZyvNlA7LGwxjVv",
+      "createdAt": "2025-10-25T05:54:12.373Z",
+      "trackingNumber": "837574441224",
+      "company": {
+        "id": "sJh7clXfcBxkyFGFWXd7-",
+        "name": "Feil Group"
+      },
+      "provider": "DPD",
+      "mode": "EXPORT",
+      "originCountry": "CZ",
+      "destinationCountry": "HU"
+    },
+    "invoicedWeight": 4.57,
+    "invoicedPrice": 650
+  },
+  {
+    "id": "inv4_003_new",
+    "shipment": {
+      "id": "NEW_SHIPMENT_004",
+      "createdAt": "2025-11-18T11:45:00.000Z",
+      "trackingNumber": "123456789012",
+      "company": {
+        "id": "F_K4QQ8bOWnXKLFuk2vPw",
+        "name": "Witting - Schneider"
+      },
+      "provider": "DPD",
+      "mode": "IMPORT",
+      "originCountry": "PL",
+      "destinationCountry": "CZ"
+    },
+    "invoicedWeight": 20.0,
+    "invoicedPrice": 2100
+  },
+  {
+    "id": "inv4_004_new",
+    "shipment": {
+      "id": "NEW_SHIPMENT_005",
+      "createdAt": "2025-11-19T08:30:00.000Z",
+      "trackingNumber": "987654321098",
+      "company": {
+        "id": "WhiAt082TzFqBSZYfSX_1",
+        "name": "Becker - Botsford"
+      },
+      "provider": "UPS",
+      "mode": "EXPORT",
+      "originCountry": "CZ",
+      "destinationCountry": "FR"
+    },
+    "invoicedWeight": 18.5,
+    "invoicedPrice": 1750
+  },
+  {
+    "id": "inv4_005_final_price",
+    "shipment": {
+      "id": "E6Z3-FNGuJsBfcDh7H0_T",
+      "createdAt": "2025-11-03T06:02:06.359Z",
+      "trackingNumber": "523561874454",
+      "company": {
+        "id": "F_K4QQ8bOWnXKLFuk2vPw",
+        "name": "Witting - Schneider"
+      },
+      "provider": "FedEx",
+      "mode": "EXPORT",
+      "originCountry": "CZ",
+      "destinationCountry": "RW"
+    },
+    "invoicedWeight": 8.37,
+    "invoicedPrice": 580
+  },
+  {
+    "id": "inv4_006_new_price",
+    "shipment": {
+      "id": "NEW_SHIPMENT_001",
+      "createdAt": "2025-11-15T10:30:00.000Z",
+      "trackingNumber": "999888777666",
+      "company": {
+        "id": "fGZvzkW7AW696vc97qb1-",
+        "name": "Lynch - Bartoletti"
+      },
+      "provider": "UPS",
+      "mode": "IMPORT",
+      "originCountry": "DE",
+      "destinationCountry": "CZ"
+    },
+    "invoicedWeight": 15.5,
+    "invoicedPrice": 1350
+  },
+  {
+    "id": "inv4_007_new",
+    "shipment": {
+      "id": "NEW_SHIPMENT_006",
+      "createdAt": "2025-11-20T13:20:00.000Z",
+      "trackingNumber": "456789012345",
+      "company": {
+        "id": "sJh7clXfcBxkyFGFWXd7-",
+        "name": "Feil Group"
+      },
+      "provider": "GLS",
+      "mode": "EXPORT",
+      "originCountry": "CZ",
+      "destinationCountry": "IT"
+    },
+    "invoicedWeight": 6.2,
+    "invoicedPrice": 750
+  }
+]
+

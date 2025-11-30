@@ -1,0 +1,107 @@
+{
+  "common": {
+    "loading": "Načítání...",
+    "cancel": "Zrušit",
+    "close": "Zavřít",
+    "confirm": "Potvrdit",
+    "error": "Chyba",
+    "all": "Všechny",
+    "page": "Strana",
+    "of": "z",
+    "showing": "Zobrazeno",
+    "to": "do",
+    "from": "z"
+  },
+  "dashboard": {
+    "title": "Delivro Dashboard",
+    "uploadInvoices": "Nahrát faktury"
+  },
+  "dashboardTitle": {
+    "title": "Nástěnka Delivro"    
+  },
+  "companyFilter": {
+    "allCompanies": "Všechny společnosti"
+  },
+  "deliveryCompanies": {
+    "deliveryCompanies": "Dopravci"
+  },
+  "trackingSearch": {
+    "placeholder": "Vyhledat podle tracking number..."
+  },
+  "shipmentsTable": {
+    "trackingNumber": "Tracking Number",
+    "company": "Společnost",
+    "provider": "Dopravce",
+    "mode": "Režim",
+    "country": "Země",
+    "weight": "Váha (kg)",
+    "price": "Cena (CZK)",
+    "actions": "Akce",
+    "history": "Historie",
+    "noShipments": "Žádné zásilky k zobrazení",
+    "shipments": "zásilek",
+    "providers": "Dopravci"
+  },
+  "previewTable": {
+    "company": "Společnost",
+    "provider": "Dopravce",
+    "weight": "Váha (kg)",
+    "price": "Cena (CZK)",
+    "invoices": "faktur"
+  },
+  "uploadModal": {
+    "title": "Nahrát faktury",
+    "selectFile": "Vyberte JSON soubor",
+    "chooseFile": "Vybrat soubor",
+    "preview": "Náhled dat",
+    "uploading": "Nahrávání...",
+    "pleaseWait": "Prosím vyčkejte, nahrávání probíhá...",
+    "validationError": "Chyba validace",
+    "confirmUpload": "Potvrdit nahrání",
+    "preparing": "Příprava dat...",
+    "loadingFile": "Načítání souboru...",
+    "processing": "Zpracování dat...",
+    "uploadingToDb": "Nahrávání {count} faktur do databáze...",
+    "completing": "Dokončování...",
+    "done": "Hotovo!",
+    "errors": {
+      "invalidFile": "Prosím vyberte JSON soubor",
+      "fileTooLarge": "Soubor je příliš velký ({size} MB). Maximální velikost je 50 MB.",
+      "emptyFile": "Soubor je prázdný",
+      "invalidJson": "Soubor neobsahuje platný JSON. Zkontrolujte syntaxi JSON souboru.",
+      "notArray": "JSON soubor musí obsahovat pole (array) faktur. Soubor neobsahuje pole.",
+      "emptyArray": "Soubor neobsahuje žádné faktury. Pole faktur je prázdné.",
+      "invalidData": "Soubor obsahuje neplatná data:",
+      "andMore": "... a dalších {count} chyb."
+    }
+  },
+  "priceHistory": {
+    "title": "Historie cen",
+    "tracking": "Tracking",
+    "date": "Datum",
+    "weight": "Váha (kg)",
+    "price": "Cena (CZK)",
+    "noHistory": "Žádná historie faktur pro tuto zásilku",
+    "loadingError": "Chyba při načítání historie"
+  },
+  "validation": {
+    "missingInvoiceId": "Faktura {index}: chybí ID faktury",
+    "missingShipment": "Faktura {index}: chybí údaje o zásilce",
+    "missingShipmentId": "Faktura {index}: chybí ID zásilky",
+    "missingTrackingNumber": "Faktura {index}: chybí tracking number",
+    "missingCompany": "Faktura {index}: chybí údaje o společnosti",
+    "missingCompanyId": "Faktura {index}: chybí ID společnosti",
+    "missingCompanyName": "Faktura {index}: chybí název společnosti",
+    "missingProvider": "Faktura {index}: chybí dopravce",
+    "invalidProvider": "Faktura {index}: neplatný dopravce \"{provider}\" (povolené: GLS, DPD, UPS, PPL, FedEx)",
+    "missingMode": "Faktura {index}: chybí režim zásilky",
+    "invalidMode": "Faktura {index}: neplatný režim \"{mode}\" (povolené: EXPORT, IMPORT)",
+    "missingOriginCountry": "Faktura {index}: chybí země původu",
+    "missingDestinationCountry": "Faktura {index}: chybí země určení",
+    "invalidWeight": "Faktura {index}: chybí nebo není platná váha (musí být číslo)",
+    "weightMustBePositive": "Faktura {index}: váha musí být větší než 0",
+    "invalidPrice": "Faktura {index}: chybí nebo není platná cena (musí být číslo)",
+    "priceCannotBeNegative": "Faktura {index}: cena nemůže být záporná"
+  }
+}
+
